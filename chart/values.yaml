@@ -1,0 +1,12 @@
+namespace: ecuaalejo2013-dev
+name: cmtx-api-data
+image:
+  repository: docker.io/alexisvg2520/cmtx-api-data
+  tag: latest
+resources:
+  requests: { cpu: 30m, memory: 128Mi }
+  limits:   { cpu: 200m, memory: 256Mi }
+env:
+  MONGO_HOST: cmtx-mongo
+  MONGO_PORT: "27017"
+secretRef: cmtx-mongo-credentials

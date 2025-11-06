@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app.kubernetes.io/name: {{ .Values.name }}
+    app.kubernetes.io/part-of: cmtx
+spec:
+  replicas: 1
+  selector: { matchLabels: { app.kubernetes.io/name: {{ .Values.name }} } }
+  template:
+    metadata: { labels: { app.kubernetes.io/name: {{ .Values.name }}, app.kubernetes.io/part-of: cmtx } }
+    spec:
+      containers:
+      - name: app
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        ports: [{ containerPort: 8080 }]
+        env:
+        - { name: MONGO_HOST, value: "{{ .Values.env.MONGO_HOST }}" }
+        - { name: MONGO_PORT, value: "{{ .Values.env.MONGO_PORT }}" }
+        envFrom:
+        - secretRef: { name: {{ .Values.secretRef }} }
+        securityContext: { runAsNonRoot: true }
+        resources: {{- toYaml .Values.resources | nindent 10 }}
