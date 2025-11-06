@@ -8,15 +8,15 @@ MONGO_USER = os.getenv("MONGO_INITDB_ROOT_USERNAME")
 MONGO_PASS = os.getenv("MONGO_INITDB_ROOT_PASSWORD")
 MONGO_DB   = os.getenv("MONGO_INITDB_DATABASE", "cmtxdb")
 
-def client():
-    uri = f"mongodb://{MONGO_USER}:{MONGO_PASS}@{MONGO_HOST}:{MONGO_PORT}/{MONGO_DB}"
-    return MongoClient(uri, serverSelectionTimeoutMS=2000)
+def get_client():
+    uri = f"mongodb://{MONGO_USER}:{MONGO_PASS}@{MONGO_HOST}:{MONGO_PORT}/?authSource=admin"
+    return MongoClient(uri, serverSelectionTimeoutMS=3000)
 
 def get_message():
-    c = client()
+    c = get_client()
     col = c[MONGO_DB]["messages"]
     if col.count_documents({}) == 0:
-        col.insert_one({"message": "Hola desde Mongo (PV) 👋", "ts": time.time()})
+        col.insert_one({"message": "Hola desde Mongo (PV) 👋"})
     doc = col.find_one({}, sort=[("_id", 1)])
     return doc.get("message", "Sin mensaje")
 
