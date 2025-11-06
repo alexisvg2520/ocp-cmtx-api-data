@@ -3,6 +3,8 @@ on:
   push:
     branches: ["master"]
     paths:
+      - 'Dockerfile'
+      - 'app.py'
       - 'chart/**'
       - '.github/workflows/build-deploy.yaml'
   workflow_dispatch: {}
