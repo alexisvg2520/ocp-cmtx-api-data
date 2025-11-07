@@ -24,6 +24,13 @@ class H(BaseHTTPRequestHandler):
     def _diagnose_mongo(self) -> str:
         lines = [f"MONGO={MONGO_HOST}:{MONGO_PORT} db={MONGO_DB}"]
         try:
+            with open("/etc/resolv.conf", "r", encoding="utf-8") as fh:
+                nameservers = [ln.strip() for ln in fh if ln.startswith("nameserver")]
+            if nameservers:
+                lines.append("resolv.conf " + ", ".join(nameservers))
+        except OSError as e:
+            lines.append(f"resolv.conf ✖ {e}")
+        try:
             infos = socket.getaddrinfo(MONGO_HOST, MONGO_PORT, proto=socket.IPPROTO_TCP)
             uniq = sorted({f"{info[4][0]}:{info[4][1]}" for info in infos})
             lines.append("DNS ✔ " + ", ".join(uniq))
