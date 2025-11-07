@@ -1,6 +1,6 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pymongo import MongoClient
-import os, time
+import os, time, socket, contextlib
 
 MONGO_HOST = os.getenv("MONGO_HOST", "cmtx-mongo")
 MONGO_PORT = int(os.getenv("MONGO_PORT", "27017"))
@@ -21,6 +21,27 @@ def get_message():
     return doc.get("message", "Sin mensaje")
 
 class H(BaseHTTPRequestHandler):
+    def _diagnose_mongo(self) -> str:
+        lines = [f"MONGO={MONGO_HOST}:{MONGO_PORT} db={MONGO_DB}"]
+        try:
+            infos = socket.getaddrinfo(MONGO_HOST, MONGO_PORT, proto=socket.IPPROTO_TCP)
+            uniq = sorted({f"{info[4][0]}:{info[4][1]}" for info in infos})
+            lines.append("DNS ✔ " + ", ".join(uniq))
+        except socket.gaierror as e:
+            lines.append(f"DNS ✖ {e}")
+        try:
+            with contextlib.closing(socket.create_connection((MONGO_HOST, MONGO_PORT), timeout=2)):
+                lines.append("TCP CONNECT ✔")
+        except OSError as e:
+            lines.append(f"TCP CONNECT ✖ {e}")
+        try:
+            client = get_client()
+            client.admin.command("ping")
+            lines.append("Mongo ping ✔")
+        except Exception as e:
+            lines.append(f"Mongo ping ✖ {e}")
+        return "\n".join(lines)
+
     def do_GET(self):
         if self.path == "/data":
             try:
@@ -33,6 +54,9 @@ class H(BaseHTTPRequestHandler):
             return
         if self.path == "/health":
             self.send_response(200); self.end_headers(); self.wfile.write(b"ok"); return
+        if self.path == "/diag":
+            self.send_response(200); self.end_headers(); self.wfile.write(self._diagnose_mongo().encode())
+            return
         self.send_response(404); self.end_headers()
 
 if __name__ == "__main__":
