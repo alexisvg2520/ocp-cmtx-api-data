@@ -9,7 +9,7 @@ MONGO_PASS = os.getenv("MONGO_INITDB_ROOT_PASSWORD")
 MONGO_DB   = os.getenv("MONGO_INITDB_DATABASE", "cmtxdb")
 
 def get_client():
-    uri = f"mongodb://{MONGO_USER}:{MONGO_PASS}@{MONGO_HOST}:{MONGO_PORT}/?authSource=admin"
+    uri = f"mongodb://{MONGO_USER}:{MONGO_PASS}@{MONGO_HOST}:{MONGO_PORT}/?authSource={MONGO_DB}"
     return MongoClient(uri, serverSelectionTimeoutMS=3000)
 
 def get_message():
