@@ -7,6 +7,6 @@ resources:
   requests: { cpu: 30m, memory: 128Mi }
   limits:   { cpu: 200m, memory: 256Mi }
 env:
-  MONGO_HOST: 172.30.159.69
+  MONGO_HOST: cmtx-mongo
   MONGO_PORT: "27017"
 secretRef: cmtx-mongo-credentials
